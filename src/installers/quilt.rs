@@ -80,10 +80,10 @@ fn write_json(
 ) -> Result<(), Box<dyn error::Error>> {
     directory.push("launcher_profiles.json");
     let current_time = Utc::now().to_string();
-    let mut read_data: LauncherProfiles = serde_json::from_str(&read_to_string(&directory)?)?;
+    let read_data: LauncherProfiles = serde_json::from_str(&read_to_string(&directory)?)?;
     let mut new_profile: Map<String, Value> = read_data.profiles[&short_version_name]
-        .as_object_mut()
-        .ok_or(Error::FailedJson)?
+        .as_object()
+        .unwrap_or(&Map::new())
         .clone();
     new_profile.insert("lastUsed".to_string(), Value::String(current_time.clone()));
     new_profile.insert("lastVersionId".to_string(), Value::String(version_name));

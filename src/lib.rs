@@ -13,8 +13,6 @@ pub enum Error {
     NoDirectory,
     #[error("Selected version was not found")]
     NoVersion,
-    #[error("Failed to parse Json data.")]
-    FailedJson,
 }
 
 pub enum Loader {
