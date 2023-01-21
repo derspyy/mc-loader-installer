@@ -1,7 +1,8 @@
 use super::super::Error;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use serde_json::{Map, Value};
+use serde_json::Value;
+use std::collections::HashMap;
 use std::error;
 use std::fs::{create_dir_all, read_to_string, File};
 use std::io::Write;
@@ -64,9 +65,35 @@ fn get_latest(agent: &Agent) -> Result<String, Box<dyn error::Error>> {
 
 #[derive(Deserialize, Serialize, Debug)]
 struct LauncherProfiles {
-    profiles: Map<String, Value>,
+    profiles: HashMap<String, Profile>,
     settings: Value,
     version: usize,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+struct Profile {
+    last_used: String,
+    last_version_id: String,
+    created: String,
+    icon: String,
+    #[serde(rename = "type")]
+    _type: String,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>
+}
+
+impl Profile {
+    fn new() -> Profile {
+        Profile {
+            last_used: String::new(),
+            last_version_id: String::new(),
+            created: String::new(),
+            icon: String::new(),
+            _type: String::new(),
+            extra: HashMap::new(),
+        }
+    }
 }
 
 fn write_json(
@@ -76,24 +103,17 @@ fn write_json(
 ) -> Result<(), Box<dyn error::Error>> {
     directory.push("launcher_profiles.json");
     let current_time = Utc::now().to_string();
-    let read_data: LauncherProfiles = serde_json::from_str(&read_to_string(&directory)?)?;
-    let mut new_profile: Map<String, Value> = read_data.profiles[&short_version_name]
-        .as_object()
-        .unwrap_or(&Map::new())
-        .clone();
-    new_profile.insert("lastUsed".to_string(), Value::String(current_time.clone()));
-    new_profile.insert("lastVersionId".to_string(), Value::String(version_name));
-    new_profile.insert("created".to_string(), Value::String(current_time));
-    new_profile.insert(
-        "name".to_string(),
-        Value::String(short_version_name.clone()),
-    );
-    new_profile.insert("icon".to_string(), Value::String(FABRIC_ICON.to_string()));
-    new_profile.insert("type".to_string(), Value::String("custom".to_string()));
     let mut read_data: LauncherProfiles = serde_json::from_str(&read_to_string(&directory)?)?;
-    read_data
-        .profiles
-        .insert(short_version_name, Value::Object(new_profile));
+    let mut new_profile = read_data.profiles
+        .get(&short_version_name)
+        .map(|x| x.clone())
+        .unwrap_or(Profile::new());
+    new_profile.last_used = current_time.clone();
+    new_profile.last_version_id = version_name;
+    new_profile.created = current_time;
+    new_profile.icon = FABRIC_ICON.to_string();
+    new_profile._type = "custom".to_string();
+    read_data.profiles.insert(short_version_name, new_profile);
     let mut file = File::create(directory)?;
     file.write_all(serde_json::to_string(&read_data)?.as_bytes())?;
     Ok(())
