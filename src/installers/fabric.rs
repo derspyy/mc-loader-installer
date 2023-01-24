@@ -73,6 +73,7 @@ struct LauncherProfiles {
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 struct Profile {
+    name: String,
     last_used: String,
     last_version_id: String,
     created: String,
@@ -86,6 +87,7 @@ struct Profile {
 impl Profile {
     fn new() -> Profile {
         Profile {
+            name: String::new(),
             last_used: String::new(),
             last_version_id: String::new(),
             created: String::new(),
@@ -108,6 +110,7 @@ fn write_json(
         .get(&short_version_name)
         .map(|x| x.clone())
         .unwrap_or(Profile::new());
+    new_profile.name = short_version_name.clone();
     new_profile.last_used = current_time.clone();
     new_profile.last_version_id = version_name;
     new_profile.created = current_time;
