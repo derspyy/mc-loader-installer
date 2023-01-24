@@ -81,7 +81,7 @@ struct Profile {
     #[serde(rename = "type")]
     _type: String,
     #[serde(flatten)]
-    extra: HashMap<String, Value>
+    extra: HashMap<String, Value>,
 }
 
 impl Profile {
@@ -106,7 +106,8 @@ fn write_json(
     directory.push("launcher_profiles.json");
     let current_time = Utc::now().to_string();
     let mut read_data: LauncherProfiles = serde_json::from_str(&read_to_string(&directory)?)?;
-    let mut new_profile = read_data.profiles
+    let mut new_profile = read_data
+        .profiles
         .get(&short_version_name)
         .cloned()
         .unwrap_or_else(Profile::new);
