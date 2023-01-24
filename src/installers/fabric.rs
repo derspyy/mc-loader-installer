@@ -108,8 +108,8 @@ fn write_json(
     let mut read_data: LauncherProfiles = serde_json::from_str(&read_to_string(&directory)?)?;
     let mut new_profile = read_data.profiles
         .get(&short_version_name)
-        .map(|x| x.clone())
-        .unwrap_or(Profile::new());
+        .cloned()
+        .unwrap_or_else(Profile::new);
     new_profile.name = short_version_name.clone();
     new_profile.last_used = current_time.clone();
     new_profile.last_version_id = version_name;
