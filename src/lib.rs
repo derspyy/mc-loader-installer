@@ -52,10 +52,10 @@ impl Installer {
 
 #[cfg(target_os = "windows")]
 fn get_directory() -> Result<PathBuf, Box<dyn error::Error>> {
-    let mut dir = home_dir().ok_or(Error::NoDirectory)?;
-    dir.push("AppData");
-    dir.push("Roaming");
-    dir.push(".minecraft");
+    let dir = home_dir().ok_or(Error::NoDirectory)?
+        .join("AppData")
+        .join("Roaming")
+        .join(".minecraft");
     if !dir.exists() {
         return Err(Box::new(Error::NoDirectory));
     }
@@ -64,8 +64,8 @@ fn get_directory() -> Result<PathBuf, Box<dyn error::Error>> {
 
 #[cfg(target_os = "linux")]
 fn get_directory() -> Result<PathBuf, Box<dyn error::Error>> {
-    let mut dir = home_dir().ok_or(Error::NoDirectory)?;
-    dir.push(".minecraft");
+    let dir = home_dir().ok_or(Error::NoDirectory)?
+        .join(".minecraft");
     if !dir.exists() {
         return Err(Box::new(Error::NoDirectory));
     }
@@ -74,10 +74,10 @@ fn get_directory() -> Result<PathBuf, Box<dyn error::Error>> {
 
 #[cfg(target_os = "macos")]
 fn get_directory() -> Result<PathBuf, Box<dyn error::Error>> {
-    let mut dir = home_dir().ok_or(Error::NoDirectory)?;
-    dir.push("Library");
-    dir.push("Application Support");
-    dir.push("minecraft");
+    let dir = home_dir().ok_or(Error::NoDirectory)?
+        .join("Library")
+        .join("Application Support")
+        .join("minecraft");
     if !dir.exists() {
         return Err(Box::new(Error::NoDirectory));
     }
